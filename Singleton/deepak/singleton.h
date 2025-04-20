@@ -7,11 +7,11 @@ class Singleton {
 private:
   static Singleton *pinstance_;
   static mutex mutex_;
+  Singleton(const string value) : value_(value) {}
 
 protected:
   string value_;
   static Singleton *singleton_;
-  Singleton(const string value) : value_(value) {}
 
 public:
   Singleton(Singleton &other) = delete;
