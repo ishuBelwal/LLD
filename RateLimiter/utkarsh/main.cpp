@@ -1,14 +1,9 @@
 #include "rateLimiter.h"
 #include <chrono>
 #include <gtest/gtest.h>
-#include <iostream>
-#include <mutex>
-#include <ostream>
 #include <string>
 #include <thread>
 #include <vector>
-
-mutex mutex_;
 
 TEST(RateLimiterTest, SimpleNoRefill) {
 
@@ -42,6 +37,8 @@ TEST(RateLimiterTest, SimpleWithWait) {
 }
 
 // TO RUN THIS TEST ONLY: ./main --gtest_filter=SimpleWithThreads
+// TO Remove thread safety remove lock_guard from fixedWindow.cpp and this test
+// will fail
 TEST(RateLimiterTest, SimpleWithThreads) {
   int j = 10000;
   while (j--) {
