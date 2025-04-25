@@ -28,9 +28,12 @@ class CornPizza : public Pizza {
 
 class PizzaStore { // aka the Creator
 public:
+  string name;
   virtual ~PizzaStore() {};
   virtual Pizza *createPizza(string name) = 0;
-  virtual void printName() = 0;
+  virtual void printName() {
+    printf("Hello! Welcome to %s store\n", name.c_str());
+  };
 
   void orderPizza(string name) {
     Pizza *pizza =
@@ -42,11 +45,8 @@ public:
 };
 
 class DominosPizzaStore : public PizzaStore {
-private:
-  string name;
-
 public:
-  DominosPizzaStore(string name_) : name(name_) {};
+  DominosPizzaStore(string name_) { this->name = name_; }
   ~DominosPizzaStore() {
     printf("GoodBye!! %s is closing\n", this->name.c_str());
   }
@@ -60,16 +60,11 @@ public:
 
     return nullptr;
   }
-
-  void printName() { printf("Hello! Welcome to %s store\n", name.c_str()); }
 };
 
 class PizzaHutPizzaStore : public PizzaStore {
-private:
-  string name;
-
 public:
-  PizzaHutPizzaStore(string name_) : name(name_) {};
+  PizzaHutPizzaStore(string name_) { this->name = name_; };
   ~PizzaHutPizzaStore() {
     printf("GoodBye!! %s is closing\n", this->name.c_str());
   }
@@ -83,8 +78,6 @@ public:
 
     return nullptr;
   }
-
-  void printName() { printf("Hello! Welcome to %s store\n", name.c_str()); }
 };
 
 int main() {
