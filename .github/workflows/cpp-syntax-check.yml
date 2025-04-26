@@ -1,0 +1,26 @@
+
+name: C++ Syntax Check
+
+on:
+  push:
+    branches:
+      - '**'  # Match all branches
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install g++
+      run: sudo apt-get update && sudo apt-get install -y g++
+
+    - name: Find and compile all .cpp files
+      run: |
+        mkdir -p build
+        for file in $(find . -name '*.cpp'); do
+          echo "Checking $file"
+          g++ -fsyntax-only "$file"
+        done
