@@ -1,7 +1,7 @@
-#include <bis/tdc++.h>
-using namespace std
+#include <bits/stdc++.h>
+using namespace std;
 
-    class Product {
+class Product {
 public:
   virtual ~Product() {};
   virtual void Operation() {};
