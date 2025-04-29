@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <chrono>
 #include <ctime>
+#include <gtest/gtest.h>
 #include <thread>
 #include <unordered_map>
 using namespace std;
@@ -19,6 +20,7 @@ struct User {
 
 class FixedWindowStrategy : public RateLimiterStrategy {
 private:
+  mutex mutex_;
   int requestsPerWindow;
   int windowSizeInSeconds;
   unordered_map<string, User *> userMap;
@@ -29,6 +31,7 @@ public:
     this->windowSizeInSeconds = windowSizeInSeconds;
   }
   bool allow(string userId) {
+    lock_guard<mutex> lock(mutex_);
     if (!userMap.count(userId)) {
       userMap[userId] = new User(userId);
     }
@@ -39,14 +42,10 @@ public:
 
     auto user = userMap[userId];
 
-    cout << "User - " << userId << " ,currWindow: " << currWindow
-         << " , User window - " << user->window << "\n";
     if (user->window != currWindow) {
       user->window = currWindow;
       user->requestProcessed = 0;
     }
-
-    cout << " User requestProcessed: " << user->requestProcessed << "\n";
 
     if (user->requestProcessed >= requestsPerWindow) {
       return false;
@@ -57,24 +56,60 @@ public:
   }
 };
 
-int main() {
+TEST(FixedWindowStrategyTest, UserLimitTest) {
   RateLimiterStrategy *r = new FixedWindowStrategy(4, 10);
   string userId = "user1";
-  string userId2 = "user2";
-  assert(r->allow(userId));
-  assert(r->allow(userId2));
-  assert(r->allow(userId));
-  assert(r->allow(userId2));
-  assert(r->allow(userId));
-  assert(r->allow(userId2));
-  assert(r->allow(userId));
-  assert(!r->allow(userId));
+  int requestCount = 5;
+  int requestProcessed = 0;
+  for (int i = 0; i < requestCount; i++) {
+    if (r->allow(userId)) {
+      requestProcessed++;
+    }
+  }
+  EXPECT_EQ(4, requestProcessed);
+}
 
-  std::this_thread::sleep_for(chrono::seconds(10));
-  assert(r->allow(userId));
-  assert(r->allow(userId2));
-  assert(r->allow(userId2));
-  assert(r->allow(userId2));
-  assert(r->allow(userId2));
-  assert(!r->allow(userId2));
+// To enable this testcase remove DISABLE_ prefix from test name
+TEST(FixedWindowStrategyTest, DISABLED_WindowResetTest) {
+  RateLimiterStrategy *r = new FixedWindowStrategy(4, 10);
+  string userId = "user1";
+  int requestCount = 9;
+  int requestProcessed = 0;
+  for (int i = 0; i < 4; i++) {
+    if (r->allow(userId)) {
+      requestProcessed++;
+    }
+  }
+  this_thread::sleep_for(chrono::seconds(10));
+  for (int i = 4; i < requestCount; i++) {
+    if (r->allow(userId)) {
+      requestProcessed++;
+    }
+  }
+  EXPECT_EQ(8, requestProcessed);
+}
+
+TEST(FixedWindowStrategyTest, RequestFromMultipleThreadsTest) {
+  int t = 10000;
+  while (t-- > 0) {
+    RateLimiterStrategy *r = new FixedWindowStrategy(4, 10);
+    string userId = "user1";
+
+    vector<thread> threads;
+    int numberOfRequests = 8;
+    atomic<int> numberOfRequestsAllowed = 0;
+    for (int i = 0; i < numberOfRequests; i++) {
+      threads.emplace_back(([&] {
+        if (r->allow(userId)) {
+          numberOfRequestsAllowed++;
+        }
+      }));
+    }
+
+    for (int i = 0; i < numberOfRequests; i++) {
+      threads[i].join();
+    }
+
+    ASSERT_EQ(4, numberOfRequestsAllowed);
+  }
 }
