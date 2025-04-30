@@ -6,6 +6,7 @@ on:
       - master
 
 jobs:
+  name: C++ Syntax Check
   build:
     runs-on: ubuntu-latest
 
