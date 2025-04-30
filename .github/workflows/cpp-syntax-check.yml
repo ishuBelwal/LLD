@@ -1,26 +1,32 @@
-
 name: C++ Syntax Check
 
 on:
-  push:
+  pull_request:
     branches:
-      - '**'  # Match all branches
+      - master
 
 jobs:
   build:
+    name: C++ Syntax Check
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install g++
-      run: sudo apt-get update && sudo apt-get install -y g++
+    - name: Install g++ and GoogleTest
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ libgtest-dev cmake
+        cd /usr/src/googletest
+        sudo cmake -S googletest -B build
+        sudo cmake --build build
+        sudo cp build/lib/*.a /usr/lib
 
     - name: Find and compile all .cpp files
       run: |
         mkdir -p build
         for file in $(find . -name '*.cpp'); do
           echo "Checking $file"
-          g++ -fsyntax-only "$file"
+          g++ -fsyntax-only -I/usr/include "$file"
         done
