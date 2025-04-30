@@ -16,7 +16,7 @@ public:
 class ConcreteProduct1 : public Product {
 public:
   std::string Operation() const override {
-    return "{Result of the ConcreteProduct1}";
+    return "{Result of the ConcreteProduct1 Yo}";
   }
 };
 class ConcreteProduct2 : public Product {
