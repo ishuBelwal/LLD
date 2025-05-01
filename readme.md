@@ -17,5 +17,5 @@ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 
 The symlink should be added to the root of the project, root can be seen in :LspInfo run from a c++ project file.
 ```
-ln -s compile_commands.json <build_path>
+ln -s compile_commands.json <build_path_to_compile_commands.json>
 ```
